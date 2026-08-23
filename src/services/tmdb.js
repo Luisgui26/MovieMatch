@@ -25,8 +25,37 @@ export const sortOptions = [
   { value: 'vote_count.desc', label: 'Mais comentados' },
 ];
 
+export const watchProviderOptions = [
+  { value: '', label: 'Qualquer lugar' },
+  { value: 'theaters', label: 'Nos cinemas' },
+  { value: '8', label: 'Netflix' },
+  { value: '119', label: 'Prime Video' },
+  { value: '337', label: 'Disney+' },
+  { value: '1899', label: 'Max' },
+  { value: '350', label: 'Apple TV+' },
+  { value: '307', label: 'Globoplay' },
+];
+
 export function getPosterUrl(path) {
   return path ? `${TMDB_IMAGE_BASE_URL}${path}` : '';
+}
+
+function formatDate(date) {
+  return date.toISOString().split('T')[0];
+}
+
+function getTheatricalWindow() {
+  const today = new Date();
+  const startDate = new Date(today);
+  const endDate = new Date(today);
+
+  startDate.setDate(today.getDate() - 45);
+  endDate.setDate(today.getDate() + 14);
+
+  return {
+    from: formatDate(startDate),
+    to: formatDate(endDate),
+  };
 }
 
 export async function discoverMovies(filters) {
@@ -49,11 +78,23 @@ export async function discoverMovies(filters) {
     params.set('with_genres', filters.genre);
   }
 
-  if (filters.yearFrom) {
+  if (filters.watchProvider === 'theaters') {
+    const theatricalWindow = getTheatricalWindow();
+
+    params.set('with_release_type', '2|3');
+    params.set('release_date.gte', theatricalWindow.from);
+    params.set('release_date.lte', theatricalWindow.to);
+  } else if (filters.watchProvider) {
+    params.set('watch_region', filters.region);
+    params.set('with_watch_providers', filters.watchProvider);
+    params.set('with_watch_monetization_types', 'flatrate');
+  }
+
+  if (filters.yearFrom && filters.watchProvider !== 'theaters') {
     params.set('primary_release_date.gte', `${filters.yearFrom}-01-01`);
   }
 
-  if (filters.yearTo) {
+  if (filters.yearTo && filters.watchProvider !== 'theaters') {
     params.set('primary_release_date.lte', `${filters.yearTo}-12-31`);
   }
 

@@ -6,6 +6,7 @@ export const initialFilters = {
   runtimeMax: '',
   language: 'pt-BR',
   region: 'BR',
+  watchProvider: '',
   sortBy: 'popularity.desc',
   page: 1,
 };

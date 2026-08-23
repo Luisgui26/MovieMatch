@@ -1,5 +1,5 @@
 import React from 'react';
-import { genreOptions, sortOptions } from '../services/tmdb';
+import { genreOptions, sortOptions, watchProviderOptions } from '../services/tmdb';
 
 function FiltersPanel({ filters, onChangeFilter, onSearch, status }) {
   function handleChange(event) {
@@ -109,6 +109,17 @@ function FiltersPanel({ filters, onChangeFilter, onSearch, status }) {
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Onde assistir
+          <select name="watchProvider" value={filters.watchProvider} onChange={handleChange}>
+            {watchProviderOptions.map((provider) => (
+              <option key={provider.value || 'all'} value={provider.value}>
+                {provider.label}
               </option>
             ))}
           </select>
