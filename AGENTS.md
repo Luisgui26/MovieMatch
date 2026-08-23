@@ -26,8 +26,12 @@ Filmes aceitos devem ser salvos localmente no navegador do usuario, sem backend 
 ## Estrutura Atual
 
 - `src/main.jsx`: ponto de entrada da aplicacao
-- `src/App.jsx`: componente principal e tela inicial
+- `src/App.jsx`: orquestracao principal da aplicacao
+- `src/components/`: componentes React de apresentacao
+- `src/hooks/`: hooks customizados para estado, efeitos e interacoes
+- `src/constants/`: constantes compartilhadas como filtros iniciais e chaves de storage
 - `src/styles.css`: estilos globais
+- `src/services/tmdb.js`: servico de integracao com a API do TMDb
 - `index.html`: HTML base usado pelo Vite
 - `SKILLS/.agents/skills/frontend-design/SKILL.md`: guia local para decisoes de design frontend
 
@@ -35,6 +39,8 @@ Filmes aceitos devem ser salvos localmente no navegador do usuario, sem backend 
 
 - Mantenha a aplicacao simples e incremental.
 - Prefira componentes pequenos quando uma tela comecar a crescer.
+- Manter `App.jsx` como composicao/orquestracao; mover UI para `src/components` e logica reutilizavel para `src/hooks`.
+- Criar hooks customizados com nomes `use...` e responsabilidades especificas, evitando hooks genericos de ciclo de vida.
 - Evite adicionar bibliotecas antes de haver uma necessidade clara.
 - Nao introduza backend; o estado persistido deve ficar no navegador do usuario.
 - Separe a logica de API da UI quando a integracao com TMDb for criada.
@@ -45,11 +51,14 @@ Filmes aceitos devem ser salvos localmente no navegador do usuario, sem backend 
 
 Quando implementar a integracao:
 
-- Criar um arquivo dedicado para chamadas da API, por exemplo `src/services/tmdb.js`.
+- Manter chamadas da API no arquivo dedicado `src/services/tmdb.js`.
 - Ler a chave por `import.meta.env.VITE_TMDB_API_KEY`.
 - Documentar a variavel necessaria em um arquivo `.env.example`.
 - Tratar estados de carregamento, erro e lista vazia.
 - Evitar chamadas repetidas desnecessarias para a mesma busca.
+- Usar o endpoint Discover Movie (`/3/discover/movie`) para filtros principais.
+- Filtros atuais devem seguir parametros oficiais do TMDb: `with_genres`, `primary_release_date.gte`, `primary_release_date.lte`, `vote_average.gte`, `vote_count.gte`, `with_runtime.lte`, `language`, `region` e `sort_by`.
+- A chave no `.env` protege o repositorio, mas em uma aplicacao client-side ela ainda fica visivel no navegador; para producao, considerar proxy/backend.
 
 ## Experiencia do Usuario
 
@@ -58,7 +67,13 @@ Quando implementar a integracao:
 - O card do filme deve destacar poster, titulo, ano, nota e sinopse curta.
 - Acoes de aceitar e descartar devem funcionar por botoes e, depois, por gesto de arrastar.
 - Filmes aceitos devem poder ser consultados em uma lista salva.
+- Filmes salvos ou descartados nao devem voltar a aparecer nas recomendacoes.
+- A tela deve ter uma secao para consultar e remover filmes salvos.
 - A interface deve funcionar bem em desktop e celular.
+- No mobile, a experiencia deve ser separada em etapas: filtros, escolha dos filmes e lista de salvos.
+- No mobile, a lista de filmes salvos deve ficar em uma secao acessada por clique, nao sempre visivel abaixo do card.
+- Cada etapa mobile deve caber em uma tela de iPhone usando `100svh`; evitar rolagem da pagina para acessar controles principais.
+- Se houver muitos filmes salvos no mobile, usar rolagem interna apenas na lista de salvos.
 
 ## Direcao Visual
 
@@ -76,8 +91,12 @@ Quando implementar a integracao:
 
 - Comecar com `localStorage`.
 - Usar uma chave clara, por exemplo `moviematch.savedMovies`.
+- Usar uma chave clara para descartados, por exemplo `moviematch.dismissedMovieIds`.
 - Salvar apenas os dados necessarios do filme.
 - Evitar duplicar filmes ja salvos.
+- Filtrar resultados da TMDb contra salvos e descartados antes de exibir o card.
+- Quando a pilha de filmes estiver acabando, buscar automaticamente paginas seguintes do TMDb antes de mostrar estado vazio.
+- Se uma pagina do TMDb ficar vazia apos remover salvos/descartados, continuar buscando paginas seguintes antes de concluir que nao ha sugestoes.
 
 ## Estilo e Qualidade
 
