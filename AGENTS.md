@@ -72,8 +72,8 @@ Quando implementar a integracao:
 - A interface deve funcionar bem em desktop e celular.
 - No mobile, a experiencia deve ser separada em etapas: filtros, escolha dos filmes e lista de salvos.
 - No mobile, a lista de filmes salvos deve ficar em uma secao acessada por clique, nao sempre visivel abaixo do card.
-- Cada etapa mobile deve caber em uma tela de iPhone usando `100svh`; evitar rolagem da pagina para acessar controles principais.
-- Se houver muitos filmes salvos no mobile, usar rolagem interna apenas na lista de salvos.
+- No mobile, evitar cortes e elementos espremidos; permitir rolagem natural quando a tela nao comportar todo o conteudo.
+- Priorizar que controles principais fiquem proximos e legiveis, sem bloquear scroll global da pagina.
 
 ## Direcao Visual
 
