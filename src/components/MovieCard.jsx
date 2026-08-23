@@ -1,8 +1,25 @@
 import React from 'react';
 import { getPosterUrl } from '../services/tmdb';
 
-function MovieCard({ cardStyle, drag, movie, savedMovieIds, swipeHandlers }) {
+function MovieCard({ cardStyle, drag, movie, onOpenMovie, savedMovieIds, swipeHandlers }) {
   const posterUrl = getPosterUrl(movie.poster_path);
+
+  function handleClick() {
+    if (swipeHandlers.shouldIgnoreClick()) {
+      return;
+    }
+
+    onOpenMovie(movie);
+  }
+
+  function handleKeyDown(event) {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+    onOpenMovie(movie);
+  }
 
   return (
     <article
@@ -12,7 +29,10 @@ function MovieCard({ cardStyle, drag, movie, savedMovieIds, swipeHandlers }) {
       onPointerMove={swipeHandlers.onPointerMove}
       onPointerUp={swipeHandlers.onPointerUp}
       onPointerCancel={swipeHandlers.onPointerCancel}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
       style={cardStyle}
+      tabIndex="0"
     >
       <div className="swipe-badge reject-badge" aria-hidden="true">Descartar</div>
       <div className="swipe-badge save-badge" aria-hidden="true">Salvar</div>

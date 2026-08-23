@@ -1,5 +1,6 @@
 import React from 'react';
 import MovieCard from './MovieCard';
+import MovieDetailsModal from './MovieDetailsModal';
 
 function SwipeDeck({
   currentIndex,
@@ -14,6 +15,8 @@ function SwipeDeck({
   status,
   swipe,
 }) {
+  const [selectedMovie, setSelectedMovie] = React.useState(null);
+
   return (
     <section className="swipe-area" data-swipe-hint={swipe.swipeHint} aria-label="Sugestao de filme">
       <div className="decision-rails" aria-hidden="true">
@@ -30,6 +33,7 @@ function SwipeDeck({
           cardStyle={swipe.cardStyle}
           drag={swipe.drag}
           movie={currentMovie}
+          onOpenMovie={setSelectedMovie}
           savedMovieIds={savedMovieIds}
           swipeHandlers={{
             cardRef: swipe.cardRef,
@@ -37,6 +41,7 @@ function SwipeDeck({
             onPointerDown: swipe.handlePointerDown,
             onPointerMove: swipe.handlePointerMove,
             onPointerUp: swipe.handlePointerUp,
+            shouldIgnoreClick: swipe.shouldIgnoreClick,
           }}
         />
       )}
@@ -65,6 +70,8 @@ function SwipeDeck({
         {savedCount} salvos, {dismissedCount} descartados / pagina {pageInfo.page}
         {currentMovie ? ` / ${currentIndex + 1} de ${movies.length}` : ''}
       </p>
+
+      <MovieDetailsModal movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
     </section>
   );
 }

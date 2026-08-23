@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const swipeThreshold = 140;
+const clickSuppressionThreshold = 22;
 
 export function useSwipeCard({ onSwipe }) {
   const [isDragging, setIsDragging] = useState(false);
@@ -9,6 +10,7 @@ export function useSwipeCard({ onSwipe }) {
   const dragRef = useRef({ x: 0, y: 0 });
   const dragStartRef = useRef({ x: 0, y: 0 });
   const frameRef = useRef(0);
+  const suppressNextClickRef = useRef(false);
   const swipeHintRef = useRef('idle');
 
   const setCardPosition = useCallback((x, y) => {
@@ -60,6 +62,7 @@ export function useSwipeCard({ onSwipe }) {
 
   function handlePointerDown(event) {
     event.currentTarget.setPointerCapture(event.pointerId);
+    suppressNextClickRef.current = false;
     dragStartRef.current = {
       x: event.clientX - dragRef.current.x,
       y: event.clientY - dragRef.current.y,
@@ -76,6 +79,10 @@ export function useSwipeCard({ onSwipe }) {
     const nextY = event.clientY - dragStartRef.current.y;
 
     setCardPosition(nextX, nextY);
+    suppressNextClickRef.current = (
+      Math.abs(nextX) > clickSuppressionThreshold
+      || Math.abs(nextY) > clickSuppressionThreshold
+    );
 
     if (nextX > 42) {
       updateSwipeHint('save');
@@ -92,16 +99,24 @@ export function useSwipeCard({ onSwipe }) {
     }
 
     if (dragRef.current.x > swipeThreshold) {
+      suppressNextClickRef.current = true;
       completeSwipe('save');
       return;
     }
 
     if (dragRef.current.x < -swipeThreshold) {
+      suppressNextClickRef.current = true;
       completeSwipe('reject');
       return;
     }
 
     resetCard();
+  }
+
+  function shouldIgnoreClick() {
+    const shouldIgnore = suppressNextClickRef.current;
+    suppressNextClickRef.current = false;
+    return shouldIgnore;
   }
 
   useEffect(() => () => {
@@ -123,6 +138,7 @@ export function useSwipeCard({ onSwipe }) {
     handlePointerMove,
     handlePointerUp,
     resetCard,
+    shouldIgnoreClick,
     swipeHint,
     triggerSwipe: completeSwipe,
   };
