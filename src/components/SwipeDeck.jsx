@@ -32,6 +32,7 @@ function SwipeDeck({
           movie={currentMovie}
           savedMovieIds={savedMovieIds}
           swipeHandlers={{
+            cardRef: swipe.cardRef,
             onPointerCancel: swipe.handlePointerCancel,
             onPointerDown: swipe.handlePointerDown,
             onPointerMove: swipe.handlePointerMove,

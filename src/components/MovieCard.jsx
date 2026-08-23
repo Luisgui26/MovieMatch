@@ -6,6 +6,7 @@ function MovieCard({ cardStyle, drag, movie, savedMovieIds, swipeHandlers }) {
 
   return (
     <article
+      ref={swipeHandlers.cardRef}
       className={`movie-card${drag.isDragging ? ' is-dragging' : ''}`}
       onPointerDown={swipeHandlers.onPointerDown}
       onPointerMove={swipeHandlers.onPointerMove}

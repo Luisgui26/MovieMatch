@@ -1,21 +1,56 @@
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const swipeThreshold = 140;
 
 export function useSwipeCard({ onSwipe }) {
-  const [drag, setDrag] = useState({ x: 0, y: 0, isDragging: false });
+  const [isDragging, setIsDragging] = useState(false);
   const [swipeHint, setSwipeHint] = useState('idle');
+  const cardRef = useRef(null);
+  const dragRef = useRef({ x: 0, y: 0 });
   const dragStartRef = useRef({ x: 0, y: 0 });
+  const frameRef = useRef(0);
+  const swipeHintRef = useRef('idle');
 
-  function resetCard() {
-    setDrag({ x: 0, y: 0, isDragging: false });
-    setSwipeHint('idle');
-  }
+  const setCardPosition = useCallback((x, y) => {
+    dragRef.current = { x, y };
+
+    if (frameRef.current) {
+      return;
+    }
+
+    frameRef.current = window.requestAnimationFrame(() => {
+      const card = cardRef.current;
+
+      if (card) {
+        card.style.setProperty('--drag-x', `${dragRef.current.x}px`);
+        card.style.setProperty('--drag-y', `${dragRef.current.y}px`);
+        card.style.setProperty('--drag-rotate', `${dragRef.current.x / 18}deg`);
+      }
+
+      frameRef.current = 0;
+    });
+  }, []);
+
+  const updateSwipeHint = useCallback((nextHint) => {
+    if (swipeHintRef.current === nextHint) {
+      return;
+    }
+
+    swipeHintRef.current = nextHint;
+    setSwipeHint(nextHint);
+  }, []);
+
+  const resetCard = useCallback(() => {
+    setIsDragging(false);
+    setCardPosition(0, 0);
+    updateSwipeHint('idle');
+  }, [setCardPosition, updateSwipeHint]);
 
   function completeSwipe(direction) {
     const exitX = direction === 'save' ? 620 : -620;
-    setSwipeHint(direction);
-    setDrag((currentDrag) => ({ x: exitX, y: currentDrag.y, isDragging: false }));
+    setIsDragging(false);
+    updateSwipeHint(direction);
+    setCardPosition(exitX, dragRef.current.y);
 
     window.setTimeout(() => {
       onSwipe(direction);
@@ -26,28 +61,28 @@ export function useSwipeCard({ onSwipe }) {
   function handlePointerDown(event) {
     event.currentTarget.setPointerCapture(event.pointerId);
     dragStartRef.current = {
-      x: event.clientX - drag.x,
-      y: event.clientY - drag.y,
+      x: event.clientX - dragRef.current.x,
+      y: event.clientY - dragRef.current.y,
     };
-    setDrag((currentDrag) => ({ ...currentDrag, isDragging: true }));
+    setIsDragging(true);
   }
 
   function handlePointerMove(event) {
-    if (!drag.isDragging) {
+    if (!isDragging) {
       return;
     }
 
     const nextX = event.clientX - dragStartRef.current.x;
     const nextY = event.clientY - dragStartRef.current.y;
 
-    setDrag({ x: nextX, y: nextY, isDragging: true });
+    setCardPosition(nextX, nextY);
 
     if (nextX > 42) {
-      setSwipeHint('save');
+      updateSwipeHint('save');
     } else if (nextX < -42) {
-      setSwipeHint('reject');
+      updateSwipeHint('reject');
     } else {
-      setSwipeHint('idle');
+      updateSwipeHint('idle');
     }
   }
 
@@ -56,12 +91,12 @@ export function useSwipeCard({ onSwipe }) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
 
-    if (drag.x > swipeThreshold) {
+    if (dragRef.current.x > swipeThreshold) {
       completeSwipe('save');
       return;
     }
 
-    if (drag.x < -swipeThreshold) {
+    if (dragRef.current.x < -swipeThreshold) {
       completeSwipe('reject');
       return;
     }
@@ -69,13 +104,20 @@ export function useSwipeCard({ onSwipe }) {
     resetCard();
   }
 
+  useEffect(() => () => {
+    if (frameRef.current) {
+      window.cancelAnimationFrame(frameRef.current);
+    }
+  }, []);
+
   return {
+    cardRef,
     cardStyle: {
-      '--drag-x': `${drag.x}px`,
-      '--drag-y': `${drag.y}px`,
-      '--drag-rotate': `${drag.x / 18}deg`,
+      '--drag-x': '0px',
+      '--drag-y': '0px',
+      '--drag-rotate': '0deg',
     },
-    drag,
+    drag: { isDragging },
     handlePointerCancel: resetCard,
     handlePointerDown,
     handlePointerMove,

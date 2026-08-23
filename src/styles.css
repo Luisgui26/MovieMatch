@@ -424,6 +424,7 @@ select:focus-visible {
     18px -16px 0 rgb(82 209 170 / 18%);
   touch-action: none;
   user-select: none;
+  will-change: transform;
   transform: translate3d(var(--drag-x, 0), var(--drag-y, 0), 0)
     rotate(calc(1.2deg + var(--drag-rotate, 0deg)));
   transition:
@@ -458,6 +459,8 @@ select:focus-visible {
   aspect-ratio: 2 / 3;
   object-fit: cover;
   pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .poster-placeholder span {
