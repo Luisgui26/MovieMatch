@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function useTheme() {
   const [theme, setTheme] = useState('dark');
   const [isThemeChanging, setIsThemeChanging] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   function toggleTheme() {
     setIsThemeChanging(true);
