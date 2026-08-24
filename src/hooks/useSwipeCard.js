@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 const swipeThreshold = 140;
 const clickSuppressionThreshold = 22;
+const dragIntentThreshold = 10;
 
 export function useSwipeCard({ onSwipe }) {
   const [isDragging, setIsDragging] = useState(false);
@@ -10,6 +11,7 @@ export function useSwipeCard({ onSwipe }) {
   const dragRef = useRef({ x: 0, y: 0 });
   const dragStartRef = useRef({ x: 0, y: 0 });
   const frameRef = useRef(0);
+  const dragIntentRef = useRef('idle');
   const suppressNextClickRef = useRef(false);
   const swipeHintRef = useRef('idle');
 
@@ -43,6 +45,7 @@ export function useSwipeCard({ onSwipe }) {
   }, []);
 
   const resetCard = useCallback(() => {
+    dragIntentRef.current = 'idle';
     setIsDragging(false);
     setCardPosition(0, 0);
     updateSwipeHint('idle');
@@ -62,6 +65,7 @@ export function useSwipeCard({ onSwipe }) {
 
   function handlePointerDown(event) {
     event.currentTarget.setPointerCapture(event.pointerId);
+    dragIntentRef.current = 'idle';
     suppressNextClickRef.current = false;
     dragStartRef.current = {
       x: event.clientX - dragRef.current.x,
@@ -77,11 +81,26 @@ export function useSwipeCard({ onSwipe }) {
 
     const nextX = event.clientX - dragStartRef.current.x;
     const nextY = event.clientY - dragStartRef.current.y;
+    const absoluteX = Math.abs(nextX);
+    const absoluteY = Math.abs(nextY);
 
-    setCardPosition(nextX, nextY);
+    if (dragIntentRef.current === 'idle' && absoluteX + absoluteY > dragIntentThreshold) {
+      dragIntentRef.current = absoluteX >= absoluteY ? 'horizontal' : 'vertical';
+    }
+
+    if (dragIntentRef.current === 'vertical') {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+
+      resetCard();
+      return;
+    }
+
+    setCardPosition(nextX, nextY * 0.35);
     suppressNextClickRef.current = (
-      Math.abs(nextX) > clickSuppressionThreshold
-      || Math.abs(nextY) > clickSuppressionThreshold
+      absoluteX > clickSuppressionThreshold
+      || absoluteY > clickSuppressionThreshold
     );
 
     if (nextX > 42) {

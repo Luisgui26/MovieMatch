@@ -5,16 +5,30 @@
   font-synthesis: none;
   line-height: 1.5;
   text-rendering: optimizeLegibility;
+  background: #111017;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: #111017;
+}
+
 body {
   margin: 0;
   min-width: 320px;
+  min-height: 100%;
+  background: #111017;
+}
+
+#root {
   min-height: 100vh;
+  min-height: 100dvh;
+  background: #111017;
 }
 
 button,
@@ -422,7 +436,7 @@ select:focus-visible {
   box-shadow:
     -18px 16px 0 rgb(240 100 73 / 26%),
     18px -16px 0 rgb(82 209 170 / 18%);
-  touch-action: none;
+  touch-action: pan-y;
   user-select: none;
   will-change: transform;
   transform: translate3d(var(--drag-x, 0), var(--drag-y, 0), 0)
@@ -942,6 +956,7 @@ select:focus-visible {
   .app-shell {
     gap: 16px;
     min-height: 100svh;
+    min-height: 100dvh;
     overflow: visible;
     padding: 16px 16px 24px;
   }
@@ -1053,6 +1068,7 @@ select:focus-visible {
     grid-template-rows: auto auto auto;
     align-content: start;
     min-height: auto;
+    padding-bottom: max(18px, env(safe-area-inset-bottom));
   }
 
   .movie-card {
