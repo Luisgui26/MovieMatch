@@ -6,7 +6,8 @@ const clickSuppressionThreshold = 22;
 const dragIntentThreshold = 6;
 const flickDistance = 34;
 const flickVelocity = 0.5;
-const exitDuration = 180;
+const gestureExitDuration = 180;
+const buttonExitDuration = 550;
 
 export function useSwipeCard({ onSwipe }) {
   const [isDragging, setIsDragging] = useState(false);
@@ -64,7 +65,7 @@ export function useSwipeCard({ onSwipe }) {
     updateSwipeHint('idle');
   }, [setCardPosition, updateSwipeHint]);
 
-  function completeSwipe(direction) {
+  function completeSwipe(direction, duration = gestureExitDuration) {
     if (exitTimerRef.current) {
       return;
     }
@@ -73,6 +74,7 @@ export function useSwipeCard({ onSwipe }) {
     const exitDistance = window.innerWidth + cardWidth;
     const exitX = direction === 'save' ? exitDistance : -exitDistance;
 
+    cardRef.current?.style.setProperty('--swipe-duration', `${duration}ms`);
     draggingRef.current = false;
     setIsDragging(false);
     updateSwipeHint(direction);
@@ -82,7 +84,7 @@ export function useSwipeCard({ onSwipe }) {
       exitTimerRef.current = 0;
       onSwipe(direction);
       resetCard();
-    }, exitDuration);
+    }, duration);
   }
 
   function handlePointerDown(event) {
@@ -217,6 +219,7 @@ export function useSwipeCard({ onSwipe }) {
       '--drag-x': '0px',
       '--drag-y': '0px',
       '--drag-rotate': '0deg',
+      '--swipe-duration': `${gestureExitDuration}ms`,
     },
     drag: { isDragging },
     handlePointerCancel: resetCard,
@@ -226,6 +229,6 @@ export function useSwipeCard({ onSwipe }) {
     resetCard,
     shouldIgnoreClick,
     swipeHint,
-    triggerSwipe: completeSwipe,
+    triggerSwipe: (direction) => completeSwipe(direction, buttonExitDuration),
   };
 }
