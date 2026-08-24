@@ -444,16 +444,14 @@ select:focus-visible {
   touch-action: pan-y;
   user-select: none;
   will-change: transform;
+  backface-visibility: hidden;
+  transform-origin: 50% 82%;
   transform: translate3d(var(--drag-x, 0), var(--drag-y, 0), 0)
     rotate(calc(1.2deg + var(--drag-rotate, 0deg)));
   transition:
-    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 180ms ease;
-}
-
-.movie-card:hover {
-  transform: translate3d(var(--drag-x, 0), calc(var(--drag-y, 0) - 5px), 0)
-    rotate(var(--drag-rotate, 0deg));
+    transform 180ms cubic-bezier(0.22, 0.78, 0.18, 1),
+    border-color 100ms ease,
+    box-shadow 100ms ease;
 }
 
 .movie-card:focus-visible {
@@ -481,7 +479,16 @@ select:focus-visible {
 
 .movie-card.is-dragging {
   cursor: grabbing;
-  transition: box-shadow 120ms ease;
+  transition:
+    border-color 80ms linear,
+    box-shadow 80ms linear;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .movie-card:hover:not(.is-dragging) {
+    transform: translate3d(var(--drag-x, 0), calc(var(--drag-y, 0) - 5px), 0)
+      rotate(var(--drag-rotate, 0deg));
+  }
 }
 
 .poster-placeholder {
@@ -537,10 +544,9 @@ select:focus-visible {
   opacity: 0;
   text-align: center;
   text-transform: uppercase;
-  backdrop-filter: blur(8px);
   transition:
-    opacity 160ms ease,
-    transform 160ms ease;
+    opacity 100ms linear,
+    transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
   transform: translate(-50%, -50%) scale(0.92) rotate(var(--badge-tilt));
 }
 

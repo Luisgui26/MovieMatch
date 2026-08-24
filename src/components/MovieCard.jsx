@@ -37,7 +37,13 @@ function MovieCard({ cardStyle, drag, movie, onOpenMovie, savedMovieIds, swipeHa
       <div className="swipe-badge reject-badge" aria-hidden="true">Descartar</div>
       <div className="swipe-badge save-badge" aria-hidden="true">Salvar</div>
       {posterUrl ? (
-        <img className="movie-poster" src={posterUrl} alt={`Poster de ${movie.title}`} />
+        <img
+          className="movie-poster"
+          src={posterUrl}
+          alt={`Poster de ${movie.title}`}
+          decoding="async"
+          draggable="false"
+        />
       ) : (
         <div className="poster-placeholder">
           <span>Poster</span>

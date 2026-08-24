@@ -1,6 +1,7 @@
 import React from 'react';
 import MovieCard from './MovieCard';
 import MovieDetailsModal from './MovieDetailsModal';
+import { getPosterUrl } from '../services/tmdb';
 
 function SwipeDeck({
   currentIndex,
@@ -17,6 +18,17 @@ function SwipeDeck({
 }) {
   const [selectedMovie, setSelectedMovie] = React.useState(null);
 
+  React.useEffect(() => {
+    movies.slice(currentIndex + 1, currentIndex + 3).forEach((movie) => {
+      const posterUrl = getPosterUrl(movie.poster_path);
+
+      if (posterUrl) {
+        const poster = new Image();
+        poster.src = posterUrl;
+      }
+    });
+  }, [currentIndex, movies]);
+
   return (
     <section className="swipe-area" data-swipe-hint={swipe.swipeHint} aria-label="Sugestao de filme">
       <div className="decision-rails" aria-hidden="true">
@@ -30,6 +42,7 @@ function SwipeDeck({
 
       {!error && status !== 'loading' && currentMovie && (
         <MovieCard
+          key={currentMovie.id}
           cardStyle={swipe.cardStyle}
           drag={swipe.drag}
           movie={currentMovie}
