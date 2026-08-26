@@ -25,6 +25,30 @@ export const sortOptions = [
   { value: 'vote_count.desc', label: 'Mais comentados' },
 ];
 
+export const regionGroups = [
+  {
+    label: 'America e Europa',
+    options: [
+      { value: 'BR', label: 'Brasil' },
+      { value: 'US', label: 'Estados Unidos' },
+      { value: 'PT', label: 'Portugal' },
+      { value: 'GB', label: 'Reino Unido' },
+    ],
+  },
+  {
+    label: 'Asia',
+    options: [
+      { value: 'KR', label: 'Coreia do Sul' },
+      { value: 'JP', label: 'Japao' },
+      { value: 'CN', label: 'China' },
+      { value: 'TW', label: 'Taiwan' },
+      { value: 'HK', label: 'Hong Kong' },
+      { value: 'IN', label: 'India' },
+      { value: 'TH', label: 'Tailandia' },
+    ],
+  },
+];
+
 export const watchProviderOptions = [
   { value: '', label: 'Qualquer lugar' },
   { value: 'theaters', label: 'Nos cinemas' },
@@ -71,6 +95,7 @@ export async function discoverMovies(filters) {
     page: String(filters.page || 1),
     region: filters.region,
     sort_by: filters.sortBy,
+    with_origin_country: filters.region,
     'vote_count.gte': '80',
   });
 

@@ -1,5 +1,10 @@
 import React from 'react';
-import { genreOptions, sortOptions, watchProviderOptions } from '../services/tmdb';
+import {
+  genreOptions,
+  regionGroups,
+  sortOptions,
+  watchProviderOptions,
+} from '../services/tmdb';
 
 function FiltersPanel({ filters, onChangeFilter, onSearch, status }) {
   function handleChange(event) {
@@ -128,10 +133,15 @@ function FiltersPanel({ filters, onChangeFilter, onSearch, status }) {
         <label>
           Regiao
           <select name="region" value={filters.region} onChange={handleChange}>
-            <option value="BR">Brasil</option>
-            <option value="US">Estados Unidos</option>
-            <option value="PT">Portugal</option>
-            <option value="GB">Reino Unido</option>
+            {regionGroups.map((group) => (
+              <optgroup key={group.label} label={group.label}>
+                {group.options.map((region) => (
+                  <option key={region.value} value={region.value}>
+                    {region.label}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
           </select>
         </label>
 
