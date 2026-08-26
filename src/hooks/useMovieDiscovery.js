@@ -8,6 +8,20 @@ function readStoredJson(key, fallback) {
   return storedValue ? JSON.parse(storedValue) : fallback;
 }
 
+function scheduleStoredJsonWrite(key, value) {
+  const writeValue = () => {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  };
+
+  if ('requestIdleCallback' in window) {
+    const idleId = window.requestIdleCallback(writeValue, { timeout: 800 });
+    return () => window.cancelIdleCallback(idleId);
+  }
+
+  const timeoutId = window.setTimeout(writeValue, 80);
+  return () => window.clearTimeout(timeoutId);
+}
+
 function toStoredMovie(movie) {
   return {
     id: movie.id,
@@ -152,11 +166,11 @@ export function useMovieDiscovery() {
   }, [loadUnseenMoviePages]);
 
   useEffect(() => {
-    window.localStorage.setItem(savedMoviesKey, JSON.stringify(savedMovies));
+    return scheduleStoredJsonWrite(savedMoviesKey, savedMovies);
   }, [savedMovies]);
 
   useEffect(() => {
-    window.localStorage.setItem(dismissedMoviesKey, JSON.stringify(dismissedMovieIds));
+    return scheduleStoredJsonWrite(dismissedMoviesKey, dismissedMovieIds);
   }, [dismissedMovieIds]);
 
   useEffect(() => {
@@ -210,11 +224,11 @@ export function useMovieDiscovery() {
     setCurrentIndex((index) => index + 1);
   }
 
-  function removeSavedMovie(movieId) {
+  const removeSavedMovie = useCallback((movieId) => {
     setSavedMovies((currentSavedMovies) => (
       currentSavedMovies.filter((movie) => movie.id !== movieId)
     ));
-  }
+  }, []);
 
   return {
     currentIndex,

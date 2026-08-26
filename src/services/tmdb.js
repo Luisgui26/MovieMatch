@@ -203,7 +203,11 @@ export async function discoverMovies(filters) {
     throw new Error('Configure VITE_TMDB_API_KEY no arquivo .env.');
   }
 
-  const mediaTypes = filters.mediaType === 'any' ? ['movie', 'tv'] : [filters.mediaType || 'movie'];
+  const mediaTypes = filters.watchProvider === 'theaters'
+    ? ['movie']
+    : filters.mediaType === 'any'
+      ? ['movie', 'tv']
+      : [filters.mediaType || 'movie'];
   const pages = await Promise.all(mediaTypes.map((mediaType) => (
     fetchDiscoverPage(filters, mediaType)
   )));
@@ -212,7 +216,7 @@ export async function discoverMovies(filters) {
   return {
     page: filters.page || 1,
     total_pages: Math.max(...pages.map((page) => page.total_pages || 1)),
-    results: filters.mediaType === 'any'
+    results: mediaTypes.length > 1
       ? sortCombinedResults(results, filters.sortBy)
       : results,
   };

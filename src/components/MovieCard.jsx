@@ -1,7 +1,8 @@
 import React from 'react';
+import { Info, Star } from 'lucide-react';
 import { getPosterUrl } from '../services/tmdb';
 
-function MovieCard({ cardStyle, drag, movie, onOpenMovie, savedMovieIds, swipeHandlers }) {
+function MovieCard({ cardStyle, movie, onOpenMovie, savedMovieIds, swipeHandlers }) {
   const posterUrl = getPosterUrl(movie.poster_path);
 
   function handleClick() {
@@ -24,7 +25,7 @@ function MovieCard({ cardStyle, drag, movie, onOpenMovie, savedMovieIds, swipeHa
   return (
     <article
       ref={swipeHandlers.cardRef}
-      className={`movie-card${drag.isDragging ? ' is-dragging' : ''}`}
+      className="movie-card"
       onPointerDown={swipeHandlers.onPointerDown}
       onPointerMove={swipeHandlers.onPointerMove}
       onPointerUp={swipeHandlers.onPointerUp}
@@ -32,7 +33,10 @@ function MovieCard({ cardStyle, drag, movie, onOpenMovie, savedMovieIds, swipeHa
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       style={cardStyle}
-      tabIndex="0"
+      tabIndex={0}
+      role="button"
+      aria-haspopup="dialog"
+      aria-label={`Ver detalhes de ${movie.title}`}
     >
       <div className="swipe-badge reject-badge" aria-hidden="true">Descartar</div>
       <div className="swipe-badge save-badge" aria-hidden="true">Salvar</div>
@@ -54,14 +58,18 @@ function MovieCard({ cardStyle, drag, movie, onOpenMovie, savedMovieIds, swipeHa
           <span className="match-label">
             {movie.media_type === 'tv' ? 'Serie' : 'Filme'} / TMDb
           </span>
-          <span className="rating-pill">{movie.vote_average?.toFixed(1) || '-'}</span>
+          <span className="rating-pill">
+            <Star size={14} fill="currentColor" aria-hidden="true" />
+            {movie.vote_average?.toFixed(1) || '-'}
+          </span>
         </div>
         <h2>{movie.title}</h2>
         <p>{movie.overview || 'Sem sinopse disponivel para este idioma.'}</p>
-        <div className="detail-grid" aria-label="Detalhes do filme">
+        <div className="detail-grid" aria-label="Resumo do conteúdo">
           <span>{movie.release_date?.slice(0, 4) || 'Sem ano'}</span>
           <span>{savedMovieIds.has(movie.id) ? 'Salvo' : 'Novo'}</span>
         </div>
+        <span className="details-hint"><Info size={15} aria-hidden="true" /> Ver detalhes</span>
       </div>
     </article>
   );

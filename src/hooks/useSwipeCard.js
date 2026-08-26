@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 const maxSwipeThreshold = 118;
 const minSwipeThreshold = 82;
@@ -10,12 +10,11 @@ const gestureExitDuration = 180;
 const buttonExitDuration = 550;
 
 export function useSwipeCard({ onSwipe }) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [swipeHint, setSwipeHint] = useState('idle');
   const cardRef = useRef(null);
+  const deckRef = useRef(null);
   const dragRef = useRef({ x: 0, y: 0 });
+  const cardWidthRef = useRef(0);
   const dragStartRef = useRef({ x: 0, y: 0 });
-  const frameRef = useRef(0);
   const dragIntentRef = useRef('idle');
   const draggingRef = useRef(false);
   const exitTimerRef = useRef(0);
@@ -23,24 +22,15 @@ export function useSwipeCard({ onSwipe }) {
   const suppressNextClickRef = useRef(false);
   const swipeHintRef = useRef('idle');
 
-  const setCardPosition = useCallback((x, y) => {
-    dragRef.current = { x, y };
+  const setCardPosition = useCallback((x, y, targetCard = cardRef.current) => {
+    dragRef.current.x = x;
+    dragRef.current.y = y;
 
-    if (frameRef.current) {
-      return;
+    if (targetCard) {
+      targetCard.style.setProperty('--drag-x', `${x}px`);
+      targetCard.style.setProperty('--drag-y', `${y}px`);
+      targetCard.style.setProperty('--drag-rotate', `${x / 18}deg`);
     }
-
-    frameRef.current = window.requestAnimationFrame(() => {
-      const card = cardRef.current;
-
-      if (card) {
-        card.style.setProperty('--drag-x', `${dragRef.current.x}px`);
-        card.style.setProperty('--drag-y', `${dragRef.current.y}px`);
-        card.style.setProperty('--drag-rotate', `${dragRef.current.x / 18}deg`);
-      }
-
-      frameRef.current = 0;
-    });
   }, []);
 
   const updateSwipeHint = useCallback((nextHint) => {
@@ -49,7 +39,11 @@ export function useSwipeCard({ onSwipe }) {
     }
 
     swipeHintRef.current = nextHint;
-    setSwipeHint(nextHint);
+    deckRef.current?.setAttribute('data-swipe-hint', nextHint);
+  }, []);
+
+  const setDraggingState = useCallback((isDragging) => {
+    cardRef.current?.classList.toggle('is-dragging', isDragging);
   }, []);
 
   const resetCard = useCallback(() => {
@@ -60,23 +54,23 @@ export function useSwipeCard({ onSwipe }) {
 
     dragIntentRef.current = 'idle';
     draggingRef.current = false;
-    setIsDragging(false);
+    setDraggingState(false);
     setCardPosition(0, 0);
     updateSwipeHint('idle');
-  }, [setCardPosition, updateSwipeHint]);
+  }, [setCardPosition, setDraggingState, updateSwipeHint]);
 
   function completeSwipe(direction, duration = gestureExitDuration) {
     if (exitTimerRef.current) {
       return;
     }
 
-    const cardWidth = cardRef.current?.offsetWidth || 430;
+    const cardWidth = cardWidthRef.current || cardRef.current?.offsetWidth || 430;
     const exitDistance = window.innerWidth + cardWidth;
     const exitX = direction === 'save' ? exitDistance : -exitDistance;
 
     cardRef.current?.style.setProperty('--swipe-duration', `${duration}ms`);
     draggingRef.current = false;
-    setIsDragging(false);
+    setDraggingState(false);
     updateSwipeHint(direction);
     setCardPosition(exitX, dragRef.current.y);
 
@@ -93,6 +87,7 @@ export function useSwipeCard({ onSwipe }) {
     }
 
     event.currentTarget.setPointerCapture(event.pointerId);
+    cardWidthRef.current = event.currentTarget.offsetWidth;
     dragIntentRef.current = 'idle';
     draggingRef.current = true;
     suppressNextClickRef.current = false;
@@ -105,7 +100,7 @@ export function useSwipeCard({ onSwipe }) {
       lastTime: event.timeStamp,
       velocityX: 0,
     };
-    setIsDragging(true);
+    setDraggingState(true);
   }
 
   function handlePointerMove(event) {
@@ -147,7 +142,7 @@ export function useSwipeCard({ onSwipe }) {
       velocityX: (motionRef.current.velocityX * 0.35) + (currentVelocity * 0.65),
     };
 
-    setCardPosition(nextX, nextY * 0.22);
+    setCardPosition(nextX, nextY * 0.22, event.currentTarget);
     suppressNextClickRef.current = (
       absoluteX > clickSuppressionThreshold
       || absoluteY > clickSuppressionThreshold
@@ -171,7 +166,7 @@ export function useSwipeCard({ onSwipe }) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
 
-    const cardWidth = cardRef.current?.offsetWidth || 430;
+    const cardWidth = cardWidthRef.current || cardRef.current?.offsetWidth || 430;
     const swipeThreshold = Math.min(
       maxSwipeThreshold,
       Math.max(minSwipeThreshold, cardWidth * 0.27),
@@ -204,10 +199,6 @@ export function useSwipeCard({ onSwipe }) {
   }
 
   useEffect(() => () => {
-    if (frameRef.current) {
-      window.cancelAnimationFrame(frameRef.current);
-    }
-
     if (exitTimerRef.current) {
       window.clearTimeout(exitTimerRef.current);
     }
@@ -215,20 +206,16 @@ export function useSwipeCard({ onSwipe }) {
 
   return {
     cardRef,
+    deckRef,
     cardStyle: {
-      '--drag-x': '0px',
-      '--drag-y': '0px',
-      '--drag-rotate': '0deg',
       '--swipe-duration': `${gestureExitDuration}ms`,
     },
-    drag: { isDragging },
     handlePointerCancel: resetCard,
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,
     resetCard,
     shouldIgnoreClick,
-    swipeHint,
     triggerSwipe: (direction) => completeSwipe(direction, buttonExitDuration),
   };
 }
