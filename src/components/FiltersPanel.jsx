@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   genreOptions,
+  mediaTypeOptions,
   regionGroups,
   sortOptions,
   watchProviderOptions,
@@ -35,6 +36,17 @@ function FiltersPanel({ filters, onChangeFilter, onSearch, status }) {
       </div>
 
       <form className="filters-form" onSubmit={handleSubmit}>
+        <label>
+          Tipo de conteudo
+          <select name="mediaType" value={filters.mediaType} onChange={handleChange}>
+            {mediaTypeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
         <label>
           Genero
           <select name="genre" value={filters.genre} onChange={handleChange}>

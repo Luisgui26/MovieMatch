@@ -11,6 +11,7 @@ function readStoredJson(key, fallback) {
 function toStoredMovie(movie) {
   return {
     id: movie.id,
+    media_type: movie.media_type || 'movie',
     title: movie.title,
     poster_path: movie.poster_path,
     release_date: movie.release_date,

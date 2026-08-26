@@ -1,4 +1,5 @@
 export const initialFilters = {
+  mediaType: 'movie',
   genre: '',
   yearFrom: '2010',
   yearTo: '',

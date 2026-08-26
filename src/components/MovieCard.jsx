@@ -51,7 +51,9 @@ function MovieCard({ cardStyle, drag, movie, onOpenMovie, savedMovieIds, swipeHa
       )}
       <div className="movie-info">
         <div className="movie-meta">
-          <span className="match-label">TMDb discover</span>
+          <span className="match-label">
+            {movie.media_type === 'tv' ? 'Serie' : 'Filme'} / TMDb
+          </span>
           <span className="rating-pill">{movie.vote_average?.toFixed(1) || '-'}</span>
         </div>
         <h2>{movie.title}</h2>

@@ -6,11 +6,11 @@ function SavedMoviesSection({ movies, onRemoveMovie }) {
     <section className="saved-section" aria-labelledby="saved-title">
       <div className="section-heading">
         <span className="eyebrow">Sua lista</span>
-        <h2 id="saved-title">Filmes salvos</h2>
+        <h2 id="saved-title">Conteudos salvos</h2>
       </div>
 
       {movies.length === 0 ? (
-        <p className="empty-saved">Os filmes aceitos aparecem aqui para voce consultar depois.</p>
+        <p className="empty-saved">Os filmes e series aceitos aparecem aqui para voce consultar depois.</p>
       ) : (
         <div className="saved-list">
           {movies.map((movie) => (
@@ -22,7 +22,9 @@ function SavedMoviesSection({ movies, onRemoveMovie }) {
               )}
               <div>
                 <h3>{movie.title}</h3>
-                <p>{movie.release_date?.slice(0, 4) || 'Sem ano'} / {movie.vote_average?.toFixed(1) || '-'}</p>
+                <p>
+                  {movie.media_type === 'tv' ? 'Serie' : 'Filme'} / {movie.release_date?.slice(0, 4) || 'Sem ano'} / {movie.vote_average?.toFixed(1) || '-'}
+                </p>
               </div>
               <button type="button" onClick={() => onRemoveMovie(movie.id)}>
                 Remover

@@ -45,7 +45,9 @@ function MovieDetailsModal({ movie, onClose }) {
         )}
 
         <div className="movie-modal-content">
-          <span className="eyebrow">Detalhes do filme</span>
+          <span className="eyebrow">
+            Detalhes da {movie.media_type === 'tv' ? 'serie' : 'filme'}
+          </span>
           <h2 id="movie-modal-title">{movie.title}</h2>
           <div className="movie-modal-meta" aria-label="Resumo do filme">
             <span>{releaseYear}</span>
